@@ -19,6 +19,7 @@ Required environment variables:
 
 - `DATABASE_URL` - PostgreSQL connection string
 - `CORS_ORIGINS` - optional comma-separated list of allowed frontend origins
+- `CORS_ORIGIN_REGEX` - optional origin pattern; defaults to Render subdomains
 
 Run locally:
 
@@ -61,6 +62,15 @@ Docker:
 ```bash
 docker build -t incidentiq-frontend ./frontend
 ```
+
+## Render deployment
+
+Set the backend `CORS_ORIGINS` environment variable to the exact public URL of
+the frontend service, for example `https://your-frontend.onrender.com`. The
+backend also permits Render subdomains by default so the browser can read API
+responses during deployment. Set `VITE_API_BASE_URL` as a frontend build
+environment variable to the backend public URL; it is embedded when Vite builds
+the static site.
 
 ## API
 

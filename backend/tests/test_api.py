@@ -58,3 +58,20 @@ def test_analyze_rejects_unparsable_logs(tmp_path, monkeypatch):
 
         assert response.status_code == 400
         assert response.json()["detail"].startswith("No parsable log entries")
+
+
+def test_render_frontend_origin_can_read_api_response():
+    """A deployed Render frontend must receive the CORS response header."""
+
+    origin = "https://incidentiq-frontend.onrender.com"
+    with TestClient(app) as client:
+        response = client.options(
+            "/analyze",
+            headers={
+                "Origin": origin,
+                "Access-Control-Request-Method": "POST",
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == origin

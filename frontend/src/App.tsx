@@ -29,9 +29,10 @@ type AnalyzeResponse = {
 };
 
 const api = axios.create({
-  baseURL:
-    import.meta.env.VITE_API_BASE_URL ??
-    "https://incidentiq-46tl.onrender.com",
+  baseURL: (
+    import.meta.env.VITE_API_BASE_URL ||
+    'https://incidentiq-46tl.onrender.com'
+  ).replace(/\/$/, ''),
 });
 
 const severityTone: Record<string, string> = {
@@ -67,10 +68,11 @@ export default function App() {
       const payload = new FormData();
       payload.append('file', file);
 
-      const { data } = await api.post<AnalyzeResponse>('/analyze', payload, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      const { data } = await api.post<AnalyzeResponse>('/analyze', payload);
 
+      if (!data?.incident) {
+        throw new Error('The API returned an invalid analysis response.');
+      }
       setIncident(data.incident);
     } catch (requestError) {
       setError(getErrorMessage(requestError));
@@ -256,7 +258,16 @@ function Panel({ title, items, emptyLabel }: { title: string; items: string[]; e
 
 function getErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
-    return (error.response?.data as { detail?: string } | undefined)?.detail ?? error.message;
+    const detail = (error.response?.data as { detail?: string } | undefined)?.detail;
+    if (detail) {
+      return detail;
+    }
+
+    if (error.request && !error.response) {
+      return 'The API response was blocked or unavailable. Check the backend CORS_ORIGINS setting in Render.';
+    }
+
+    return error.message;
   }
 
   if (error instanceof Error) {
