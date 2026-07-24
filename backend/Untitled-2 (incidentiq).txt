@@ -1,0 +1,3 @@
+12:00:01 INFO request routed successfully
+12:00:05 ERROR database connection pool exhausted
+12:00:07 ERROR payment request timed out after dependency failure

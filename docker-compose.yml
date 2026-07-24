@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: incidentiq-postgres
+    environment:
+      POSTGRES_DB: incidentiq
+      POSTGRES_USER: incidentiq
+      POSTGRES_PASSWORD: incidentiq
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+    container_name: incidentiq-backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://incidentiq:incidentiq@postgres:5432/incidentiq
+      CORS_ORIGINS: http://localhost:5173,http://localhost:80
+      JWT_SECRET_KEY: change-me
+      OPENAI_API_KEY: ""
+      OPENAI_MODEL: gpt-4o-mini
+    depends_on:
+      - postgres
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: incidentiq-frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  postgres_data:
